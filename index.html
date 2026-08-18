@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Architecture | Serviços</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS Reset & Variáveis */
+        :root {
+            --aws-navy: #232f3e;
+            --aws-darker: #0f1b29;
+            --aws-orange: #ff9900;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(35, 47, 62, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            /* Cores dos Serviços */
+            --color-db: #3b82f6;
+            --color-data: #10b981;
+            --color-storage: #ef4444;
+            --color-ai: #8b5cf6;
+            --color-compute: #ff9900;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--aws-darker);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 153, 0, 0.03), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 126, 185, 0.03), transparent 40%);
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background: rgba(15, 27, 41, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i { color: var(--aws-orange); }
+
+        /* Hero Section */
+        header {
+            padding: 10rem 5% 6rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 153, 0, 0.1);
+            border: 1px solid var(--aws-orange);
+            color: var(--aws-orange);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        header h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Grid Principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 5% 5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2.5rem;
+        }
+
+        /* Cards Estilo Premium */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Efeito de brilho no topo do card baseado na cor */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            opacity: 0.8;
+        }
+        .card-db::before { background: var(--color-db); }
+        .card-data::before { background: var(--color-data); }
+        .card-storage::before { background: var(--color-storage); }
+        .card-ai::before { background: var(--color-ai); }
+        .card-compute::before { background: var(--color-compute); }
+
+        .badge-escolha {
+            position: absolute;
+            top: 25px;
+            right: -35px;
+            background: var(--aws-orange);
+            color: #fff;
+            padding: 5px 40px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transform: rotate(45deg);
+            box-shadow: 0 4px 10px rgba(255, 153, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .icon-box {
+            width: 80px; height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        .card-db .icon-box { background: rgba(59, 130, 246, 0.1); color: var(--color-db); }
+        .card-data .icon-box { background: rgba(16, 185, 129, 0.1); color: var(--color-data); }
+        .card-storage .icon-box { background: rgba(239, 68, 68, 0.1); color: var(--color-storage); }
+        .card-ai .icon-box { background: rgba(139, 92, 246, 0.1); color: var(--color-ai); }
+        .card-compute .icon-box { background: rgba(255, 153, 0, 0.1); color: var(--color-compute); }
+
+        .card-header h2 {
+            font-size: 1.8rem;
+            color: #fff;
+        }
+
+        .card p.description {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* Lista de Features estilo check */
+        .features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 0.5rem;
+            margin-bottom: auto; /* Empurra as tags pro fundo */
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .features-list li i {
+            margin-top: 4px;
+            font-size: 1rem;
+        }
+        .card-db .features-list li i { color: var(--color-db); }
+        .card-data .features-list li i { color: var(--color-data); }
+        .card-storage .features-list li i { color: var(--color-storage); }
+        .card-ai .features-list li i { color: var(--color-ai); }
+        .card-compute .features-list li i { color: var(--color-compute); }
+
+        /* Tags de tecnologia */
+        .tech-stack {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .tech-pill {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-family: 'Fira Code', monospace;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .tech-pill {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 3rem 5%;
+            text-align: center;
+            color: var(--text-muted);
+            background: rgba(15, 27, 41, 0.9);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .card { padding: 2rem; }
+            .card-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo"><i class="fa-brands fa-aws"></i> AWS Services</a>
+    </nav>
+
+    <header>
+        <span class="hero-badge"><i class="fa-solid fa-cloud"></i> Análise de Arquitetura</span>
+        <h1>Catálogo de Serviços Cloud</h1>
+        <p>Visão técnica e estrutural de cinco serviços fundamentais para desenvolvimento moderno, armazenamento de dados e inteligência artificial.</p>
+    </header>
+
+    <main class="container">
+        <div class="grid">
+            
+            <!-- Amazon ECS -->
+            <div class="card card-compute">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fa-brands fa-docker"></i></div>
+                    <h2>Amazon ECS</h2>
+                </div>
+                <p class="description">Serviço de orquestração de contêineres altamente escalável e rápido. É a ferramenta perfeita para gerenciar microsserviços, backends complexos e produtos SaaS de forma ágil.</p>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Integração perfeita com Load Balancers, IAM e automações de CI/CD.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Compatibilidade total com AWS Fargate para computação serverless (sem gerenciar servidores).</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Implante arquiteturas em Node.js, Python ou Next.js em minutos.</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-pill">Containers</span>
+                    <span class="tech-pill">Microservices</span>
+                    <span class="tech-pill">DevOps</span>
+                </div>
+            </div>
+
+            <!-- Amazon DynamoDB -->
+            <div class="card card-db">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fa-solid fa-bolt"></i></div>
+                    <h2>Amazon DynamoDB</h2>
+                </div>
+                <p class="description">Banco de dados NoSQL de chave-valor totalmente gerenciado. Ele ajusta sua capacidade automaticamente, sendo a base ideal para aplicações que exigem respostas instantâneas.</p>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Desempenho previsível de um dígito de milissegundo em qualquer escala.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Arquitetura Serverless: zero administração de banco de dados.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Replicação global ativa-ativa para alta disponibilidade.</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-pill">NoSQL</span>
+                    <span class="tech-pill">Key-Value</span>
+                    <span class="tech-pill">Serverless</span>
+                </div>
+            </div>
+
+            <!-- Amazon S3 -->
+            <div class="card card-storage">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fa-solid fa-box-archive"></i></div>
+                    <h2>Amazon S3</h2>
+                </div>
+                <p class="description">Serviço de armazenamento de objetos seguro e infinitamente escalável. Construído para ser o repositório central de ativos digitais, backups corporativos e hospedagem estática.</p>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Durabilidade de dados líder do setor com 99,999999999% (11 noves).</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Classes de armazenamento flexíveis para otimização de custos de longo prazo.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Base fundacional robusta para criação de Data Lakes.</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-pill">Object Storage</span>
+                    <span class="tech-pill">Data Lake</span>
+                    <span class="tech-pill">Backups</span>
+                </div>
+            </div>
+
+            <!-- Amazon EMR -->
+            <div class="card card-data">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fa-solid fa-chart-pie"></i></div>
+                    <h2>Amazon EMR</h2>
+                </div>
+                <p class="description">Plataforma em nuvem especializada em processamento de Big Data. Ideal para empresas que lidam com análises massivas de dados e fluxos de engenharia de dados pesados.</p>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Execução facilitada de frameworks abertos como Apache Spark e Hadoop.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Desacoplamento de computação e armazenamento (integrando com o S3).</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Provisionamento de clusters sob demanda e altamente escaláveis.</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-pill">Big Data</span>
+                    <span class="tech-pill">Apache Spark</span>
+                    <span class="tech-pill">Hadoop</span>
+                </div>
+            </div>
+
+            <!-- Amazon SageMaker -->
+            <div class="card card-ai">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fa-solid fa-brain"></i></div>
+                    <h2>Amazon SageMaker</h2>
+                </div>
+                <p class="description">Ecossistema completo e gerenciado de Inteligência Artificial. Fornece ferramentas necessárias para construir, treinar e fazer o deploy de modelos de Machine Learning.</p>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Ambientes baseados em Jupyter notebook para exploração de dados rápida.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Treinamento distribuído em clusters de GPU de alta performance.</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Implantação em um clique para criar endpoints de inferência em produção.</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-pill">Machine Learning</span>
+                    <span class="tech-pill">AI Models</span>
+                    <span class="tech-pill">Deploy</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>Desenvolvido para análise arquitetural e estudo de Cloud Computing.</p>
+    </footer>
+
+</body>
+</html>
