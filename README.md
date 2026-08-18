@@ -3,11 +3,6 @@
 ## 📌 Visão Geral
 Este projeto consiste em uma página web responsiva construída puramente com HTML e CSS. O objetivo é mapear e detalhar cinco serviços críticos da infraestrutura AWS, exibindo-os em um grid de cards de alta qualidade com foco em design moderno (Dark Mode e Glassmorphism).
 
-## 📸 Preview do Projeto
-
-    (Substitua este bloco de texto pelo link da imagem do seu site quando tirar uma screenshot)
-    Formato: ![Preview do Site](link-da-imagem.png)
-
 ## 🛠️ Serviços Analisados
 A arquitetura detalha os seguintes componentes:
 
